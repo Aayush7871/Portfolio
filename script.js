@@ -3,19 +3,35 @@ const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelector('.nav-links');
 const body = document.body;
 
-hamburger.addEventListener('click', () => {
+// Toggle mobile menu
+function toggleMenu() {
     hamburger.classList.toggle('active');
     navLinks.classList.toggle('active');
-    body.classList.toggle('nav-open');
+    body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+}
+
+hamburger.addEventListener('click', toggleMenu);
+
+// Close mobile menu when clicking a link
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleMenu();
+        }
+    });
 });
 
-// Close mobile menu when clicking outside
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.navbar') && navLinks.classList.contains('active')) {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('active');
-        body.classList.remove('nav-open');
-    }
+// Handle window resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        if (window.innerWidth > 768) {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+            body.style.overflow = '';
+        }
+    }, 250);
 });
 
 // Smooth Scrolling for Navigation Links
@@ -38,47 +54,73 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Form Submission
+// Form Validation
 const contactForm = document.querySelector('.contact-form');
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(contactForm);
-    const formValues = Object.fromEntries(formData.entries());
-    // Here you would typically send the form data to a server
-    console.log('Form submitted:', formValues);
-    alert('Thank you for your message! I will get back to you soon.');
-    contactForm.reset();
-});
+const formInputs = contactForm.querySelectorAll('input, textarea');
 
-// Add animation on scroll with better performance
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('animate');
-            observer.unobserve(entry.target); // Stop observing once animated
-        }
+formInputs.forEach(input => {
+    input.addEventListener('blur', () => {
+        validateInput(input);
     });
-}, observerOptions);
 
-// Observe all sections
-document.querySelectorAll('section').forEach(section => {
-    observer.observe(section);
+    input.addEventListener('input', () => {
+        validateInput(input);
+    });
 });
 
-// Handle window resize
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 768) {
-            hamburger.classList.remove('active');
-            navLinks.classList.remove('active');
-            body.classList.remove('nav-open');
-        }
-    }, 250);
+function validateInput(input) {
+    const value = input.value.trim();
+    let isValid = true;
+    let errorMessage = '';
+
+    switch(input.type) {
+        case 'email':
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            isValid = emailRegex.test(value);
+            errorMessage = 'Please enter a valid email address';
+            break;
+        case 'text':
+            isValid = value.length >= 2;
+            errorMessage = 'Please enter at least 2 characters';
+            break;
+        case 'textarea':
+            isValid = value.length >= 10;
+            errorMessage = 'Please enter at least 10 characters';
+            break;
+    }
+
+    input.classList.toggle('invalid', !isValid);
+    return isValid;
+}
+
+// Form submission
+contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const isValid = Array.from(formInputs).every(validateInput);
+    
+    if (!isValid) {
+        return;
+    }
+
+    const submitButton = contactForm.querySelector('.submit-button');
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Sending...';
+
+    try {
+        const formData = new FormData(contactForm);
+        const formValues = Object.fromEntries(formData.entries());
+        
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        contactForm.reset();
+        alert('Message sent successfully!');
+    } catch (error) {
+        alert('Failed to send message. Please try again.');
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+    }
 });
