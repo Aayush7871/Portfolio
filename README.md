@@ -2,6 +2,10 @@
 
 A dark-first, responsive personal portfolio built with React, TypeScript, Tailwind CSS, and Lucide icons.
 
+## Live site
+
+[View the portfolio](https://aayush7871.github.io/portfolio/)
+
 ## Run locally
 
 ```bash
