@@ -2,7 +2,7 @@ export const links = {
   github: 'https://github.com/Aayush7871',
   linkedin: 'https://www.linkedin.com/in/aayush-raj-819691298/',
   email: 'mailto:aayushraj2378@gmail.com',
-  resume: '/Aayush-Raj-Resume.pdf',
+  resume: 'Aayush-Raj-Resume.pdf',
 } as const
 
 export const navigation = [
